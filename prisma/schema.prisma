@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String        @id @default(uuid())
+  username    String        @unique
+  email       String        @unique
+  password    String
+  avatar      String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  LikedStory  LikedStory[]
+  BlockedUser BlockedUser[]
+  Contributor Contributor[]
+  Comment     Comment[]
+  Story       Story[]
+
+  @@index([id], name: "idx_user_id")
+  @@index([username], name: "idx_user_username")
+}
+
+model Story {
+  id           String        @id @default(uuid())
+  title        String
+  content      String        @db.VarChar(1000)
+  published    Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  author       User          @relation(fields: [authorId], references: [id])
+  authorId     String
+  likedByUsers LikedStory[]
+  contributors Contributor[]
+  comments     Comment[]
+
+  @@index([authorId], name: "idx_story_author_id")
+}
+
+model LikedStory {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  story     Story    @relation(fields: [storyId], references: [id])
+  storyId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BlockedUser {
+  id            String   @id @default(uuid())
+  userId        String
+  blockedUser   User     @relation(fields: [blockedUserId], references: [id])
+  blockedUserId String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Contributor {
+  id        String   @id @default(uuid())
+  userId    String
+  story     Story    @relation(fields: [storyId], references: [id])
+  storyId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  story     Story    @relation(fields: [storyId], references: [id])
+  storyId   String
+}
