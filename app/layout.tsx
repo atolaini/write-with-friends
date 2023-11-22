@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
+import '../styles/globals.css';
 import { playfair, openSans } from '@/fonts/fonts';
-import './globals.css';
 
 import Header from '@/components/shared/Header';
 
